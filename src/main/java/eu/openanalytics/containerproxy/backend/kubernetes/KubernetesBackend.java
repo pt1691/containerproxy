@@ -287,7 +287,6 @@ public class KubernetesBackend extends AbstractContainerBackend {
 					.endMetadata()
 					.withNewSpec()
 						.addToSelector("app", container.getId())
-						.withType("NodePort")
 						.withPorts(servicePorts)
 						.endSpec()
 					.done();
@@ -304,14 +303,9 @@ public class KubernetesBackend extends AbstractContainerBackend {
 		// Calculate proxy routes for all configured ports.
 		for (String mappingKey: spec.getPortMapping().keySet()) {
 			int containerPort = spec.getPortMapping().get(mappingKey);
-			
-			int servicePort = -1;
-			if (service != null) servicePort = service.getSpec().getPorts().stream()
-					.filter(p -> p.getPort() == containerPort).map(p -> p.getNodePort())
-					.findAny().orElse(-1);
-			
 			String mapping = mappingStrategy.createMapping(mappingKey, container, proxy);
-			URI target = calculateTarget(container, containerPort, servicePort);
+			String serviceName = (service != null) ? service.getMetadata().getName() : "";
+			URI target = calculateTarget(container, containerPort, serviceName);
 			proxy.getTargets().put(mapping, target);
 		}
 		
@@ -385,7 +379,7 @@ public class KubernetesBackend extends AbstractContainerBackend {
 		return true;
 	}
 
-	protected URI calculateTarget(Container container, int containerPort, int servicePort) throws Exception {
+	protected URI calculateTarget(Container container, int containerPort, String serviceName) throws Exception {
 		String targetProtocol = getProperty(PROPERTY_CONTAINER_PROTOCOL, DEFAULT_TARGET_PROTOCOL);
 		String targetHostName;
 		int targetPort;
@@ -396,8 +390,8 @@ public class KubernetesBackend extends AbstractContainerBackend {
 			targetHostName = pod.getStatus().getPodIP();
 			targetPort = containerPort;
 		} else {
-			targetHostName = pod.getStatus().getHostIP();
-			targetPort = servicePort;
+			targetHostName = serviceName;
+			targetPort = containerPort;
 		}
 		
 		return new URI(String.format("%s://%s:%s", targetProtocol, targetHostName, targetPort));
