@@ -590,11 +590,14 @@ public class KubernetesBackend extends AbstractContainerBackend {
 			if (service != null) servicePort = service.getSpec().getPorts().stream()
 					.filter(p -> p.getPort() == containerPort).map(p -> p.getNodePort())
 					.findAny().orElse(-1);
-
+            
+            String serviceName = (service != null) ? service.getMetadata().getName() : "";
 			String mapping = mappingStrategy.createMapping(mappingKey, container, proxy);
-			URI target = calculateTarget(container, containerPort, servicePort);
+			URI target = calculateTarget(container, containerPort, serviceName);
 			proxy.getTargets().put(mapping, target);
 		}
 	}
 
 }
+
+
