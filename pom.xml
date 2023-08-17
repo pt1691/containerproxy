@@ -66,7 +66,7 @@
 		<repository>
 			<!-- Currently used only for the spring-social-github 1.0.0.M4 dependency -->
 			<id>spring</id>
-			<url>https://repo.spring.io/plugins-release/</url>
+			<url>https://repo.spring.io/milestone/</url>
 		</repository>
 	</repositories>
 
