@@ -232,9 +232,9 @@ public abstract class AbstractContainerBackend implements IContainerBackend {
 		return targetPath;
 	}
 
-	abstract protected URI calculateTarget(Container container, PortMappings.PortMappingEntry portMapping, Integer hostPort) throws Exception;
+	abstract protected URI calculateTarget(Container container, PortMappings.PortMappingEntry portMapping, Integer hostPort, String serviceName) throws Exception;
 
-	public Container setupPortMappingExistingProxy(Proxy proxy, Container container, Map<Integer, Integer> portBindings) throws Exception {
+	public Container setupPortMappingExistingProxy(Proxy proxy, Container container, Map<Integer, Integer> portBindings, String serviceName) throws Exception {
 		Container.ContainerBuilder containerBuilder = container.toBuilder();
 		for (PortMappings.PortMappingEntry portMapping : container.getRuntimeObject(PortMappingsKey.inst).getPortMappings()) {
 
@@ -245,7 +245,7 @@ public abstract class AbstractContainerBackend implements IContainerBackend {
 			}
 
 			String mapping = mappingStrategy.createMapping(portMapping.getName(), container, proxy);
-			URI target = calculateTarget(container, portMapping, boundPort);
+			URI target = calculateTarget(container, portMapping, boundPort, serviceName);
 			containerBuilder.addTarget(mapping, target);
 		}
 		return containerBuilder.build();

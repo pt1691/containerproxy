@@ -360,7 +360,7 @@ public class KubernetesBackend extends AbstractContainerBackend {
 								.endMetadata()
 								.withNewSpec()
 								.addToSelector("app", containerId)
-								.withType("NodePort")
+								//.withType("NodePort")
 								.withPorts(servicePorts)
 								.endSpec()
 								.build());
@@ -372,8 +372,8 @@ public class KubernetesBackend extends AbstractContainerBackend {
 				portBindings = service.getSpec().getPorts().stream()
 						.collect(Collectors.toMap(ServicePort::getPort, ServicePort::getNodePort));
 			}
-
-			return setupPortMappingExistingProxy(proxy, rContainerBuilder.build(), portBindings);
+			String serviceName = (service != null) ? service.getMetadata().getName() : "";
+			return setupPortMappingExistingProxy(proxy, rContainerBuilder.build(), portBindings, serviceName);
 		} catch (ContainerFailedToStartException t) {
 			throw t;
 		} catch (Throwable throwable) {
@@ -570,7 +570,7 @@ public class KubernetesBackend extends AbstractContainerBackend {
 		return true;
 	}
 
-	protected URI calculateTarget(Container container, PortMappings.PortMappingEntry portMapping, Integer servicePort) throws Exception {
+	protected URI calculateTarget(Container container, PortMappings.PortMappingEntry portMapping, Integer servicePort, String serviceName) throws Exception {
 		String targetProtocol = getProperty(PROPERTY_CONTAINER_PROTOCOL, DEFAULT_TARGET_PROTOCOL);
 		String targetHostName;
 		int targetPort;
@@ -581,8 +581,8 @@ public class KubernetesBackend extends AbstractContainerBackend {
 			targetHostName = pod.getStatus().getPodIP();
 			targetPort = portMapping.getPort();
 		} else {
-			targetHostName = pod.getStatus().getHostIP();
-			targetPort = servicePort;
+			targetHostName = serviceName;
+			targetPort = portMapping.getPort();
 		}
 
 		return new URI(String.format("%s://%s:%s%s", targetProtocol, targetHostName, targetPort, portMapping.getTargetPath()));

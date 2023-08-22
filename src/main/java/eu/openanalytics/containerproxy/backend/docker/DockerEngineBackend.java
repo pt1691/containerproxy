@@ -148,14 +148,14 @@ public class DockerEngineBackend extends AbstractDockerBackend {
 			rContainerBuilder.addRuntimeValue(new RuntimeValue(BackendContainerNameKey.inst, containerCreation.id()), false);
 			proxyStartupLogBuilder.containerStarted(initialContainer.getIndex());
 
-			return setupPortMappingExistingProxy(proxy, rContainerBuilder.build(), portBindings);
+			return setupPortMappingExistingProxy(proxy, rContainerBuilder.build(), portBindings, "");
 		} catch (Throwable throwable) {
 			throw new ContainerFailedToStartException("Docker container failed to start", throwable, rContainerBuilder.build());
 		}
 	}
 
 	@Override
-	protected URI calculateTarget(Container container, PortMappings.PortMappingEntry portMapping, Integer hostPort) throws Exception {
+	protected URI calculateTarget(Container container, PortMappings.PortMappingEntry portMapping, Integer hostPort, String serviceName) throws Exception {
 		String targetProtocol;
 		String targetHostName;
 		String targetPort;

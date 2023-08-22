@@ -214,7 +214,7 @@ public class DockerSwarmBackend extends AbstractDockerBackend {
 			}
 			proxyStartupLogBuilder.containerStarted(initialContainer.getIndex());
 
-			return setupPortMappingExistingProxy(proxy, rContainerBuilder.build(), portBindings);
+			return setupPortMappingExistingProxy(proxy, rContainerBuilder.build(), portBindings, "");
 		} catch (ContainerFailedToStartException t) {
 			throw t;
 		} catch (Throwable t) {
@@ -223,7 +223,7 @@ public class DockerSwarmBackend extends AbstractDockerBackend {
 	}
 
 	@Override
-	protected URI calculateTarget(Container container, PortMappings.PortMappingEntry portMapping, Integer servicePort) throws Exception {
+	protected URI calculateTarget(Container container, PortMappings.PortMappingEntry portMapping, Integer servicePort, String serviceName) throws Exception {
 		String targetProtocol = getProperty(PROPERTY_CONTAINER_PROTOCOL, DEFAULT_TARGET_PROTOCOL);
 		String targetHostName;
 		int targetPort;
